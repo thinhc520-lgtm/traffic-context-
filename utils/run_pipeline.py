@@ -1,45 +1,34 @@
+import cv2
+import numpy as np
 import os
-import sys
+from context_reasoner import ContextReasoner
+from visualizer import Visualizer
 
-# Thêm thư mục utils vào đường dẫn hệ thống
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+def run_test():
+    # 1. Giả lập 1 Khung hình (Khung đen 640x480)
+    mock_frame = np.zeros((480, 640, 3), dtype=np.uint8)
 
-from label_mapper import map_bdd_detection, YOLO_DETECTION_CLASS_NAMES
-from visualizer import draw_boxes
+    # 2. Giả lập Dữ liệu BBox từ Thành viên B
+    mock_detections = [
+        {"bbox": [100, 150, 300, 350], "label": "car", "score": 0.92},
+        {"bbox": [280, 200, 340, 380], "label": "pedestrian", "score": 0.88} # Nằm gần xe
+    ]
 
-def run_pipeline_check():
-    print("==========================================")
-    print("🚀 BẮT ĐẦU VERIFY PIPELINE TRAFFIC CONTEXT")
-    print("==========================================")
+    # 3. Chạy Reasoner & Visualizer
+    reasoner = ContextReasoner(proximity_threshold=150.0)
+    visualizer = Visualizer()
 
-    frames_dir = "test_data/extracted_frames"
-    sample_frame = os.path.join(frames_dir, "frame_0000.jpg")
-    output_demo = os.path.join(frames_dir, "pipeline_demo.jpg")
+    reasoning_result = reasoner.analyze(mock_detections)
+    output_frame = visualizer.draw(mock_frame, mock_detections, reasoning_result)
 
-    if not os.path.exists(sample_frame):
-        print(f"Loi: Khong tim thay tep {sample_frame}")
-        return
-
-    # 1. Kiểm tra ánh xạ nhãn BDD100K -> YOLO
-    test_categories = ["car", "pedestrian", "bicycle"]
-    print("\n[1] Kiem tra Label Mapper:")
-    for cat in test_categories:
-        class_id = map_bdd_detection(cat)
-        class_name = YOLO_DETECTION_CLASS_NAMES[class_id] if class_id is not None else "Unknown"
-        print(f"    - Nhan BDD '{cat}' -> YOLO Class ID {class_id} ({class_name})")
-
-    # 2. Kiểm tra Visualizer
-    print("\n[2] Kiem tra Visualizer (Ve Bounding Box mau):")
-    demo_boxes = [(100, 100, 300, 250), (350, 120, 450, 280)]
-    demo_labels = ["Vehicle (0.95)", "Pedestrian (0.88)"]
-    demo_colors = [(0, 255, 0), (0, 0, 255)]  # Xanh lá (Vehicle), Đỏ (Pedestrian)
-
-    success = draw_boxes(sample_frame, output_demo, demo_boxes, demo_labels, demo_colors)
+    # 4. Xuất kết quả kiểm tra
+    os.makedirs("test_data", exist_ok=True)
+    output_path = "test_data/mock_output.jpg"
+    cv2.imwrite(output_path, output_frame)
     
-    if success:
-        print("\n==========================================")
-        print("✅ TOAN BO HA TANG XU LY (UTILS) DA SAN SANG!")
-        print("==========================================")
+    print("=== CHẠY DỰ DỤNG PIPELINE THÀNH CÔNG ===")
+    print("Kết quả suy luận:", reasoning_result)
+    print(f"Ảnh kết quả đã lưu tại: {output_path}")
 
 if __name__ == "__main__":
-    run_pipeline_check()
+    run_test()
