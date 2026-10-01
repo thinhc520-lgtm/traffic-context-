@@ -1,0 +1,20 @@
+# Bỏ qua dữ liệu nặng
+data/raw/
+data/processed/
+
+# Bỏ qua media thử nghiệm
+test_data/raw_videos/
+test_data/extracted_frames/
+test_data/*.mp4
+test_data/*.jpg
+
+# Bỏ qua cache Python & môi trường ảo
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Tệp hệ thống
+.DS_Store
+Thumbs.db

@@ -1,0 +1,16 @@
+# Cấu hình dự án Traffic Context Reasoning
+project_name: traffic-context-reasoning
+version: 1.0.0
+
+paths:
+  raw_videos: test_data/raw_videos
+  extracted_frames: test_data/extracted_frames
+  datasets: datasets/
+
+dataset:
+  num_classes: 3
+  class_names: ["Vehicle", "Pedestrian", "Cyclist"]
+
+preprocessing:
+  frame_interval_sec: 1
+  img_size: [640, 640]
